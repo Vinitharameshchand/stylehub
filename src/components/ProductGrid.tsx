@@ -7,13 +7,15 @@ interface ProductGridProps {
   onAddToCart: (product: Product, size: string, color: string) => void;
   onToggleWishlist: (product: Product) => void;
   isInWishlist: (productId: string) => boolean;
+  onStyleAssistant?: (product: Product) => void;
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
   products,
   onAddToCart,
   onToggleWishlist,
-  isInWishlist
+  isInWishlist,
+  onStyleAssistant
 }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -24,6 +26,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
           onAddToCart={onAddToCart}
           onToggleWishlist={onToggleWishlist}
           isInWishlist={isInWishlist(product.id)}
+          onStyleAssistant={onStyleAssistant}
         />
       ))}
     </div>

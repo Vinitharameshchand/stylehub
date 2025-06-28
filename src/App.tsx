@@ -4,14 +4,19 @@ import { Sidebar } from './components/Sidebar';
 import { CategoryTabs } from './components/CategoryTabs';
 import { ProductGrid } from './components/ProductGrid';
 import { Cart } from './components/Cart';
+import { AIRecommendations } from './components/AIRecommendations';
+import { StyleAssistant } from './components/StyleAssistant';
 import { useCart } from './hooks/useCart';
 import { useWishlist } from './hooks/useWishlist';
 import { products } from './data/products';
-import { FilterState } from './types';
+import { FilterState, Product } from './types';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [isStyleAssistantOpen, setIsStyleAssistantOpen] = useState(false);
+  const [selectedProductForStyling, setSelectedProductForStyling] = useState<Product | undefined>();
+  const [searchResults, setSearchResults] = useState<Product[]>(products);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     brands: [],
@@ -25,7 +30,9 @@ function App() {
   const wishlist = useWishlist();
 
   const filteredProducts = useMemo(() => {
-    return products.filter(product => {
+    let productsToFilter = searchResults;
+    
+    return productsToFilter.filter(product => {
       // Category filter
       if (selectedCategory !== 'All' && product.category !== selectedCategory) {
         return false;
@@ -58,7 +65,14 @@ function App() {
 
       return true;
     });
-  }, [selectedCategory, filters]);
+  }, [searchResults, selectedCategory, filters]);
+
+  const handleStyleAssistant = (product?: Product) => {
+    setSelectedProductForStyling(product);
+    setIsStyleAssistantOpen(true);
+  };
+
+  const viewedProducts = cart.cartItems.map(item => item.product.id);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -66,6 +80,9 @@ function App() {
         cartItemCount={cart.getTotalItems()}
         onCartClick={() => cart.setIsCartOpen(true)}
         onMenuClick={() => setIsSidebarOpen(true)}
+        onSearchResults={setSearchResults}
+        products={products}
+        onStyleAssistantClick={() => handleStyleAssistant()}
       />
 
       <div className="flex">
@@ -83,8 +100,24 @@ function App() {
                 Discover Your Style
               </h1>
               <p className="text-gray-600">
-                Premium clothing collection for every occasion
+                Premium clothing collection powered by AI recommendations
               </p>
+            </div>
+
+            {/* AI Recommendations Section */}
+            <div className="mb-8">
+              <AIRecommendations
+                userId="user123"
+                viewedProducts={viewedProducts}
+                onAddToCart={cart.addToCart}
+                onToggleWishlist={(product) => {
+                  if (wishlist.isInWishlist(product.id)) {
+                    wishlist.removeFromWishlist(product.id);
+                  } else {
+                    wishlist.addToWishlist(product);
+                  }
+                }}
+              />
             </div>
 
             <CategoryTabs
@@ -102,6 +135,7 @@ function App() {
                 <option>Price: High to Low</option>
                 <option>Newest First</option>
                 <option>Best Rating</option>
+                <option>AI Recommended</option>
               </select>
             </div>
 
@@ -116,6 +150,7 @@ function App() {
                 }
               }}
               isInWishlist={wishlist.isInWishlist}
+              onStyleAssistant={handleStyleAssistant}
             />
 
             {filteredProducts.length === 0 && (
@@ -139,6 +174,14 @@ function App() {
         onUpdateQuantity={cart.updateQuantity}
         onRemoveItem={cart.removeFromCart}
         totalPrice={cart.getTotalPrice()}
+      />
+
+      <StyleAssistant
+        isOpen={isStyleAssistantOpen}
+        onClose={() => setIsStyleAssistantOpen(false)}
+        selectedProduct={selectedProductForStyling}
+        allProducts={products}
+        onAddToCart={cart.addToCart}
       />
     </div>
   );

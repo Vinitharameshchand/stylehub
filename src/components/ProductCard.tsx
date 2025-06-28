@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, ShoppingBag, Star } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Sparkles } from 'lucide-react';
 import { Product } from '../types';
 
 interface ProductCardProps {
@@ -7,13 +7,15 @@ interface ProductCardProps {
   onAddToCart: (product: Product, size: string, color: string) => void;
   onToggleWishlist: (product: Product) => void;
   isInWishlist: boolean;
+  onStyleAssistant?: (product: Product) => void;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onAddToCart,
   onToggleWishlist,
-  isInWishlist
+  isInWishlist,
+  onStyleAssistant
 }) => {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
@@ -48,18 +50,29 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </span>
         )}
 
-        <button
-          onClick={() => onToggleWishlist(product)}
-          className={`absolute top-3 right-3 p-2 rounded-full transition-all duration-200 ${
-            product.isOnSale ? 'top-12' : ''
-          } ${
-            isInWishlist
-              ? 'bg-red-500 text-white'
-              : 'bg-white text-gray-600 hover:bg-red-50 hover:text-red-500'
-          }`}
-        >
-          <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-current' : ''}`} />
-        </button>
+        <div className="absolute top-3 right-3 flex flex-col space-y-2">
+          {product.isOnSale && <div className="h-6"></div>}
+          
+          <button
+            onClick={() => onToggleWishlist(product)}
+            className={`p-2 rounded-full transition-all duration-200 ${
+              isInWishlist
+                ? 'bg-red-500 text-white'
+                : 'bg-white text-gray-600 hover:bg-red-50 hover:text-red-500'
+            }`}
+          >
+            <Heart className={`h-4 w-4 ${isInWishlist ? 'fill-current' : ''}`} />
+          </button>
+
+          {onStyleAssistant && (
+            <button
+              onClick={() => onStyleAssistant(product)}
+              className="bg-white text-purple-600 p-2 rounded-full hover:bg-purple-50 transition-all duration-200 opacity-0 group-hover:opacity-100"
+            >
+              <Sparkles className="h-4 w-4" />
+            </button>
+          )}
+        </div>
 
         {isHovered && (
           <div className="absolute inset-0 bg-black bg-opacity-20 flex items-end justify-center pb-4 transition-all duration-300">
